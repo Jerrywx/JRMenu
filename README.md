@@ -4,7 +4,10 @@
 
 ##效果演示 - show-how
 
-
+###抽屉效果显示
+![(App01)](http://images0.cnblogs.com/blog2015/757453/201506/141117514881708.gif)
+###侧边菜单显示
+![(App01)](http://images0.cnblogs.com/blog2015/757453/201506/141117589105674.gif)
 
 ##使用方法 - method
 ###代码块
@@ -84,4 +87,4 @@
 	return YES;
 }
 ```
-![(App01)](http://images0.cnblogs.com/blog2015/757453/201506/141111252239480.jpg)
+
