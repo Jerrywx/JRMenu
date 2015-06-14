@@ -25,7 +25,7 @@
 
 ```
 ####视图控制方法 
-```obj
+```objc
 /// 恢复位置
 -(void)showMainView;
 
