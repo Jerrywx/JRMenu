@@ -56,3 +56,31 @@
 /// 是否允许点击视图恢复视图位置。默认为yes
 @property (strong) UITapGestureRecognizer *sideslipTapGes;
 ```
+
+##使用方法
+#####AppDelegate.m
+```objc
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+	
+	// 1. 创建window
+	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	
+	// 2. 创建控制器
+	MainController *main = [[MainController alloc] init];
+	LeftController *left = [[LeftController alloc] init];
+	RightController *right = [[RightController alloc] init];
+	
+	// 3. 创建跟控制器
+	JRMenuController *controller = [[JRMenuController alloc] initWithLeftController:left andMainController:main andRightController:right];
+	controller.mainScale = 0.8;
+	controller.otherScale = 0.6;
+	controller.speedf = 0.6;
+	// 4. 设置跟控制器
+	self.window.rootViewController = controller;
+	
+	// 5. 显示 window
+	[self.window makeKeyAndVisible];
+	
+	return YES;
+}
+```
