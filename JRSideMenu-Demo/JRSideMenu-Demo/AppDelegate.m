@@ -1,16 +1,12 @@
 //
 //  AppDelegate.m
-//  JRMenuController-iOS
+//  JRSideMenu-Demo
 //
-//  Created by Jerry on 15/6/12.
-//  Copyright (c) 2015年 Jerry. All rights reserved.
+//  Created by wxiao on 16/1/18.
+//  Copyright © 2016年 wxiao. All rights reserved.
 //
 
 #import "AppDelegate.h"
-#import "MainController.h"
-#import "LeftController.h"
-#import "RightController.h"
-#import <JRMenuController/JRMenuController.h>
 
 @interface AppDelegate ()
 
@@ -20,26 +16,7 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-	
-	// 1. 创建window
-	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	
-	// 2. 创建控制器
-	MainController *main = [[MainController alloc] init];
-	LeftController *left = [[LeftController alloc] init];
-	RightController *right = [[RightController alloc] init];
-	
-	// 3. 创建跟控制器
-	JRMenuController *controller = [[JRMenuController alloc] initWithLeftController:left andMainController:main andRightController:right];
-	controller.mainScale = 0.8;
-	controller.otherScale = 0.6;
-	controller.speedf = 0.6;
-	// 4. 设置跟控制器
-	self.window.rootViewController = controller;
-	
-	// 5. 显示 window
-	[self.window makeKeyAndVisible];
-	
+	// Override point for customization after application launch.
 	return YES;
 }
 
