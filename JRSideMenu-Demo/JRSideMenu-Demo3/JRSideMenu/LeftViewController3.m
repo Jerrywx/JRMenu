@@ -6,10 +6,10 @@
 //  Copyright © 2016年 wxiao. All rights reserved.
 //
 
-#import "LeftViewController.h"
+#import "LeftViewController3.h"
 #import "UIView+JRExtension.h"
 
-@interface LeftViewController () <UIGestureRecognizerDelegate>
+@interface LeftViewController2 () <UIGestureRecognizerDelegate>
 @property (nonatomic, assign) CGFloat					speedf;					//滑动速度系数-建议在0.5-1之间。默认为0.5
 @property (nonatomic, strong) UIViewController			*leftVC;				 //左侧窗控制器
 @property (nonatomic, strong) UIViewController			*rightVC;				 //左侧窗控制器
@@ -23,10 +23,12 @@
 @property (nonatomic, assign) BOOL						isRigth;
 
 @property (nonatomic, assign) JRControllerDirection		direction;				// 方向
+@property (nonatomic, strong) UITapGestureRecognizer	*tapGesture;			//
+@property (nonatomic, assign) CGFloat					otherScale;
 
 @end
 
-@implementation LeftViewController
+@implementation LeftViewController2
 
 - (instancetype)initWithLeftView:(UIViewController *)leftVC
 					 andMainView:(UIViewController *)mainVC {
@@ -36,9 +38,11 @@
 		self.view.backgroundColor = [UIColor whiteColor];
 		
 		// 0.
-		self.speedf = 1.0;					// 滑动速度
-		self.leftVC = leftVC;				// 左侧控制器
-		self.mainVC = mainVC;				// 主控制器
+		self.speedf = 1.0;							// 滑动速度
+		self.leftVC = leftVC;						// 左侧控制器
+		self.mainVC = mainVC;						// 主控制器
+		self.tapCloseAble = YES;					// 点击关闭
+		self.mainPageScale = 0.8;					//
 		
 		// 1. 滑动手势
 		self.pan = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(handlePan:)];
@@ -65,6 +69,9 @@
 		self.leftVC		= leftVC;				// 左侧控制器
 		self.rightVC	= rightVC;
 		self.mainVC		= mainVC;				// 主控制器
+		self.mainPageScale = 0.8;
+		
+		self.tapCloseAble = YES;				// 点击关闭
 		
 		self.isLeft		= NO;
 		self.isRigth	= NO;
@@ -83,6 +90,11 @@
 		self.closed = YES;//初始时侧滑窗关闭
 	}
 	return self;
+}
+
+- (void)setMainPageScale:(CGFloat)mainPageScale {
+	_mainPageScale = mainPageScale;
+	self.otherScale = 1 - mainPageScale;
 }
 
 #pragma mark - 滑动手势
@@ -129,12 +141,26 @@
 					rec.view.center		= CGPointMake(recCenterX,recCenterY);
 					[rec setTranslation:CGPointMake(0, 0) inView:self.view];
 				}
+				
+				CGFloat ff = (1 - self.mainPageScale) * (kScreenWidth * 0.5 - self.mainVC.view.center.x)/(kScreenWidth * 0.5);
+				if (ff > 1 - self.mainPageScale) {
+					ff = 1 - self.mainPageScale;
+				}
+				self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity, 1 - ff, 1 - ff);
 			} else if (self.isLeft == YES) {
+				NSLog(@"=======================");
 				CGFloat recCenterX = rec.view.center.x + point.x * self.speedf;
 				CGFloat recCenterY	= rec.view.center.y;
 				rec.view.center		= CGPointMake(recCenterX,recCenterY);
 				[rec setTranslation:CGPointMake(0, 0) inView:self.view];
+				
+				CGFloat ff = (self.mainVC.view.center.x - kScreenWidth * 0.5) / (kOpenLeftCenterX - kMainCenterX) * self.otherScale;
+				if (ff < 0) {
+					ff = 0;
+				}
+				self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity, 1 - ff, 1 - ff);
 			}
+			
 		} else if (self.direction == jrControllerDirectionRight) {
 			
 			if (self.isRigth == NO) {
@@ -154,11 +180,26 @@
 					rec.view.center		= CGPointMake(recCenterX,recCenterY);
 					[rec setTranslation:CGPointMake(0, 0) inView:self.view];
 				}
+				
+				CGFloat ff = (self.mainVC.view.center.x - (kScreenWidth * 0.5)) / (kOpenLeftCenterX - kMainCenterX) * self.otherScale;
+				
+				if (ff > 1 - self.mainPageScale) {
+					ff = 1 - self.mainPageScale;
+				}
+				self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity, 1 - ff, 1 - ff);
+				
 			} else if(self.isRigth == YES) {
 				CGFloat recCenterX = rec.view.center.x + point.x * self.speedf;
 				CGFloat recCenterY	= rec.view.center.y;
 				rec.view.center		= CGPointMake(recCenterX,recCenterY);
 				[rec setTranslation:CGPointMake(0, 0) inView:self.view];
+				
+				CGFloat ff = (kMainCenterX - self.mainVC.view.center.x) / 270 * self.otherScale;
+				
+				if (ff < 0) {
+					ff = 0;
+				}
+				self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity, 1 - ff, 1 - ff);
 			}
 		}
 		
@@ -183,6 +224,27 @@
 	}
 }
 
+#pragma makr - 点击收拾
+- (void)addTapAction {
+	if (!self.tapCloseAble) return;
+	
+	if (self.tapGesture) {
+		[self.mainVC.view removeGestureRecognizer:self.tapGesture];
+		self.tapGesture = nil;
+	}
+	
+	self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openMainView)];
+	[self.mainVC.view addGestureRecognizer:self.tapGesture];
+}
+
+- (void)removeTapAction {
+	if (!self.tapCloseAble) return;
+	if (self.tapGesture) {
+		[self.mainVC.view removeGestureRecognizer:self.tapGesture];
+		self.tapGesture = nil;
+	}
+}
+
 #pragma mark - 修改视图位置
 - (void)closeLeftView {
 	[UIView animateWithDuration:0.2 animations:^{
@@ -196,13 +258,14 @@
 }
 
 - (void)openLeftView {
-	
 	self.isLeft = YES;
-	[UIView beginAnimations:nil context:nil];
-	self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity,kMainPageScale,1.0);
-	self.mainVC.view.center		= kMainPageCenter;
-	self.closed					= NO;
-	[UIView commitAnimations];
+	[UIView animateWithDuration:0.2 animations:^{
+		self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity,self.mainPageScale,self.mainPageScale);
+		self.mainVC.view.center		= kMainPageCenter;
+		self.closed					= NO;
+	} completion:^(BOOL finished) {
+		[self addTapAction];
+	}];
 }
 
 - (void)openMainView {
@@ -215,16 +278,19 @@
 	} completion:^(BOOL finished) {
 		self.leftVC.view.hidden = YES;
 		self.rightVC.view.hidden = YES;
+		[self removeTapAction];
 	}];
 }
 
 - (void)openRightView {
 	self.isRigth = YES;
-	[UIView beginAnimations:nil context:nil];
-	self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity,kMainPageScale,1.0);
-	self.mainVC.view.center		= kMainPageCenter2;
-	self.closed					= NO;
-	[UIView commitAnimations];
+	[UIView animateWithDuration:0.2 animations:^{
+		self.mainVC.view.transform	= CGAffineTransformScale(CGAffineTransformIdentity,self.mainPageScale,self.mainPageScale);
+		self.mainVC.view.center		= kMainPageCenter2;
+		self.closed					= NO;
+	} completion:^(BOOL finished) {
+		[self addTapAction];
+	}];
 }
 
 #pragma mark - 行为收敛控制

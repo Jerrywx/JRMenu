@@ -18,8 +18,7 @@
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-	ViewController *view = [[ViewController alloc] init];
-	[self.navigationController pushViewController:view animated:YES];
+	NSLog(@"-------=====");
 }
 
 @end
